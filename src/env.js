@@ -1,0 +1,1 @@
+export const supportTouch = 'ontouchend' in document ? true : false;

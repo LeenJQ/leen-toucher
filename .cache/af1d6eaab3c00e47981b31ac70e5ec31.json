@@ -1,0 +1,1 @@
+{"dependencies":[],"generated":{"js":"\"use strict\";\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nvar supportTouch = exports.supportTouch = 'ontouchend' in document ? true : false;"},"hash":"3a3ce0ea481d82d8f3621e29fc59a446"}
