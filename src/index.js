@@ -22,11 +22,19 @@ class Toucher {
       x1:0,y1:0,x2:0,y2:0,
       isLongTap: false, // 用来在 touchend 时判断是否为长按
       longTapTimer: null,
-      singleTapTimer: null
+      singleTapTimer: null,
+      _isActive: true  // 当false 时，停止一切监听
     })
 
     // 注册默认的事件函数
-    const _usedMehod = ['tap', 'longTap', 'dbTap']
+    const _usedMehod = [
+      'tap', 
+      'longTap', 
+      'dbTap', 
+      'swipeStart', 
+      'swipe', 
+      'swipeEnd'
+    ]
     for(let m of _usedMehod) {
       this[m] = (fn, option) => {
         this.register(m, fn, option)
@@ -43,6 +51,14 @@ class Toucher {
     this.target.addEventListener('touchend', this._proxy('touchEnd'))
     this.target.addEventListener('touchmove', this._proxy('touchMove'))
     // DOM.addEventListener('touchcancel',actionOver);
+  }
+
+  /**
+   * 停止一切监听
+   */
+  stop() {
+    this._stopWatchLongTap()
+    this._isActive = false
   }
 
   /**
@@ -101,6 +117,12 @@ class Toucher {
       that[type](e)
     }
   }
+  /**
+   * 停止监听长按事件
+   */
+  _stopWatchLongTap() {
+    clearTimeout(this.longTapTimer);        
+  }
 
   /**
    * start touch
@@ -109,6 +131,7 @@ class Toucher {
    */
   touchStart(e) {
     this.isLongTap = false
+    this._isActive = true
     
     // 这里记录最新的触摸信息
     Object.assign(this, {
@@ -119,8 +142,11 @@ class Toucher {
       touchStartTime: new Date()
     })
 
+    this._emit('swipeStart', e)
+
     // 把上一次的定时器清除
-    clearTimeout(this.longTapTimer);
+    this._stopWatchLongTap()
+    // 延时判断是否为长按事件
 		this.longTapTimer = setTimeout(()=>{
       // 如果超过 LONG_TAP_DELAY_TIME，判定为长按事件  
       this.isLongTap = true    
@@ -129,11 +155,13 @@ class Toucher {
   }
 
   /**
+   * touch moving
    * 
    * @param {Event} e - 事件对象
    */
   touchMove(e) {
-
+    this.stop()
+    this._emit('swipe', e)
   }
 
   /**
@@ -147,12 +175,17 @@ class Toucher {
       return;
     }
 
+    this._emit('swipeEnd', e)    
+
     // 到这都没有触发 longTapTimer， 
     // 说明不是长按事件
-    clearTimeout(this.longTapTimer);    
+    this._stopWatchLongTap()
+
+    if(!this._isActive) {
+      return false
+    }
     
     var now = new Date()
-    console.log(this.events)
     if(!this.events['dbTap'] || this.events['dbTap'].length == 0){
       this._emit('tap', e)
     } else if(now - this.lastTouchTime > TAP_DELAY_TIME) {

@@ -114,11 +114,12 @@ var Toucher = function () {
       x1: 0, y1: 0, x2: 0, y2: 0,
       isLongTap: false, // 用来在 touchend 时判断是否为长按
       longTapTimer: null,
-      singleTapTimer: null
+      singleTapTimer: null,
+      _isActive: true // 当false 时，停止一切监听
     });
 
     // 注册默认的事件函数
-    var _usedMehod = ['tap', 'longTap', 'dbTap'];
+    var _usedMehod = ['tap', 'longTap', 'dbTap', 'swipeStart', 'swipe', 'swipeEnd'];
 
     var _loop = function _loop(m) {
       _this[m] = function (fn, option) {
@@ -165,6 +166,17 @@ var Toucher = function () {
       this.target.addEventListener('touchend', this._proxy('touchEnd'));
       this.target.addEventListener('touchmove', this._proxy('touchMove'));
       // DOM.addEventListener('touchcancel',actionOver);
+    }
+
+    /**
+     * 停止一切监听
+     */
+
+  }, {
+    key: "stop",
+    value: function stop() {
+      this._stopWatchLongTap();
+      this._isActive = false;
     }
 
     /**
@@ -253,6 +265,15 @@ var Toucher = function () {
         that[type](e);
       };
     }
+    /**
+     * 停止监听长按事件
+     */
+
+  }, {
+    key: "_stopWatchLongTap",
+    value: function _stopWatchLongTap() {
+      clearTimeout(this.longTapTimer);
+    }
 
     /**
      * start touch
@@ -266,6 +287,7 @@ var Toucher = function () {
       var _this2 = this;
 
       this.isLongTap = false;
+      this._isActive = true;
 
       // 这里记录最新的触摸信息
       Object.assign(this, {
@@ -276,8 +298,11 @@ var Toucher = function () {
         touchStartTime: new Date()
       });
 
+      this._emit('swipeStart', e);
+
       // 把上一次的定时器清除
-      clearTimeout(this.longTapTimer);
+      this._stopWatchLongTap();
+      // 延时判断是否为长按事件
       this.longTapTimer = setTimeout(function () {
         // 如果超过 LONG_TAP_DELAY_TIME，判定为长按事件  
         _this2.isLongTap = true;
@@ -286,13 +311,17 @@ var Toucher = function () {
     }
 
     /**
+     * touch moving
      * 
      * @param {Event} e - 事件对象
      */
 
   }, {
     key: "touchMove",
-    value: function touchMove(e) {}
+    value: function touchMove(e) {
+      this.stop();
+      this._emit('swipe', e);
+    }
 
     /**
      * touch ended
@@ -310,12 +339,17 @@ var Toucher = function () {
         return;
       }
 
+      this._emit('swipeEnd', e);
+
       // 到这都没有触发 longTapTimer， 
       // 说明不是长按事件
-      clearTimeout(this.longTapTimer);
+      this._stopWatchLongTap();
+
+      if (!this._isActive) {
+        return false;
+      }
 
       var now = new Date();
-      console.log(this.events);
       if (!this.events['dbTap'] || this.events['dbTap'].length == 0) {
         this._emit('tap', e);
       } else if (now - this.lastTouchTime > TAP_DELAY_TIME) {
@@ -373,10 +407,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   console.log('taped also');
 }).longTap(function () {
   console.log('long taped');
+}).dbTap(function () {
+  console.log('double Taped');
+}).swipe(function (e) {
+  console.log('swiping', e);
+}).swipeStart(function () {
+  console.log('start swipe');
+}).swipeEnd(function () {
+  console.log('end swipe');
 });
-/*.dbTap(()=> {
-  console.log('double Taped')
-})*/
 },{"../src/index.js":3}],0:[function(require,module,exports) {
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
