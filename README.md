@@ -20,4 +20,4 @@
 
 ## 原理
 
-<img src="./img/leen-helper.png" height="500">
+<img src="./img/leen-toucher.png" height="500">
