@@ -18,3 +18,6 @@
 * 缩放
 * 旋转
 
+## 原理
+
+<img src="./img/leen-helper.png" height="500">
