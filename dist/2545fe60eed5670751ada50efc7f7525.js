@@ -111,7 +111,7 @@ var Toucher = function () {
       events: {},
       touchStartTime: 0,
       lastTouchTime: 0,
-      x1: 0, y1: 0, x2: 0, y2: 0,
+      x1: 0, y1: 0, x2: 0, y2: 0, moveX: 0, moveY: 0,
       isLongTap: false, // 用来在 touchend 时判断是否为长按
       longTapTimer: null,
       singleTapTimer: null,
@@ -162,9 +162,9 @@ var Toucher = function () {
   _createClass(Toucher, [{
     key: "init",
     value: function init() {
-      this.target.addEventListener('touchstart', this._proxy('touchStart'));
-      this.target.addEventListener('touchend', this._proxy('touchEnd'));
-      this.target.addEventListener('touchmove', this._proxy('touchMove'));
+      this.target.addEventListener('touchstart', this._proxy('touchStart'), false);
+      this.target.addEventListener('touchend', this._proxy('touchEnd'), false);
+      this.target.addEventListener('touchmove', this._proxy('touchMove'), false);
       // DOM.addEventListener('touchcancel',actionOver);
     }
 
@@ -295,10 +295,12 @@ var Toucher = function () {
         y1: e.touches[0].pageY,
         x2: 0,
         y2: 0,
+        moveX: 0,
+        moveY: 0,
         touchStartTime: new Date()
       });
 
-      this._emit('swipeStart', e);
+      this._emit('swipeStart', e.touches[0]);
 
       // 把上一次的定时器清除
       this._stopWatchLongTap();
@@ -320,7 +322,21 @@ var Toucher = function () {
     key: "touchMove",
     value: function touchMove(e) {
       this.stop();
-      this._emit('swipe', e);
+
+      // 当前坐标
+      var curX = e.touches[0].pageX;
+      var curY = e.touches[0].pageY;
+
+      // 更新最后坐标
+      Object.assign(this, {
+        x2: curX,
+        y2: curY,
+        moveX: curX - this.x1, // 计算移动 x 距离
+        moveY: curY - this.y1, // 计算移动 y 距离
+        touchStartTime: new Date()
+      });
+
+      this._emit('swipe', e.touches[0]);
     }
 
     /**
@@ -339,7 +355,7 @@ var Toucher = function () {
         return;
       }
 
-      this._emit('swipeEnd', e);
+      this._emit('swipeEnd', e.touches[0]);
 
       // 到这都没有触发 longTapTimer， 
       // 说明不是长按事件
@@ -351,6 +367,7 @@ var Toucher = function () {
 
       var now = new Date();
       if (!this.events['dbTap'] || this.events['dbTap'].length == 0) {
+        // 如果未绑定双击，直接判定为单击      
         this._emit('tap', e);
       } else if (now - this.lastTouchTime > TAP_DELAY_TIME) {
         this.singleTapTimer = setTimeout(function () {
@@ -382,7 +399,7 @@ var Toucher = function () {
   return Toucher;
 }();
 
-exports.default = function (target, option) {
+var factory = function factory(target, option) {
   if (!_env.supportTouch) {
     console.log('当前环境不支持触摸手势');
     return null;
@@ -392,6 +409,12 @@ exports.default = function (target, option) {
   t.init();
   return t;
 };
+
+if (window && !window.leenToucher) {
+  window.leenToucher = factory;
+}
+
+exports.default = factory;
 },{"./env":4}],2:[function(require,module,exports) {
 "use strict";
 
@@ -415,6 +438,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   console.log('start swipe');
 }).swipeEnd(function () {
   console.log('end swipe');
+});
+
+var startX, startY;
+(0, _index2.default)(document.querySelector('#demo2 .container .can-drag')).swipeStart(function (_, _ref) {
+  var target = _ref.target;
+
+  startX = parseInt(target.style.left) || 0;
+  startY = parseInt(target.style.top) || 0;
+}).swipe(function (e, _ref2) {
+  var target = _ref2.target,
+      moveX = _ref2.moveX,
+      moveY = _ref2.moveY;
+
+  target.style.left = startX + moveX + 'px';
+  target.style.top = startY + moveY + 'px';
 });
 },{"../src/index.js":3}],0:[function(require,module,exports) {
 var global = (1, eval)('this');

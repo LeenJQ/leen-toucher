@@ -31,10 +31,29 @@
       #child1 {
         background-color: blue
       }
+      #demo2 .container {
+        width: 80%;
+        height: 400px;
+        background-color: aquamarine;
+        border: 1px solid rgb(16, 201, 139);
+        border-radius: 10px;
+        position: relative;
+      }
+      #demo2 .container .can-drag {
+        width: 20px;
+        height: 20px;
+        background-color: #05800b;
+        border: 1px solid #fff;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
     </style>
   </head>
   <body>
-    <div id="container">
+
+    <div id="demo1">
+      <h2>Tap, longTap, DbTap</h2>
       #container
       <div id="element1">
         #element1
@@ -47,6 +66,13 @@
       </div>
       <div id="element3">
         #element3
+      </div>
+    </div>
+
+    <div id="demo2">
+      <h2>拖拽</h2>
+      <div class="container">
+        <div class="can-drag"></div>
       </div>
     </div>
     <script src="/dist/2545fe60eed5670751ada50efc7f7525.js"></script>

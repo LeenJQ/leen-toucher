@@ -31,29 +31,10 @@
       #child1 {
         background-color: blue
       }
-      #demo2 .container {
-        width: 80%;
-        height: 400px;
-        background-color: aquamarine;
-        border: 1px solid rgb(16, 201, 139);
-        border-radius: 10px;
-        position: relative;
-      }
-      #demo2 .container .can-drag {
-        width: 20px;
-        height: 20px;
-        background-color: #05800b;
-        border: 1px solid #fff;
-        position: absolute;
-        top: 0px;
-        left: 0px;
-      }
     </style>
   </head>
   <body>
-
-    <div id="demo1">
-      <h2>Tap, longTap, DbTap</h2>
+    <div id="container">
       #container
       <div id="element1">
         #element1
@@ -68,13 +49,27 @@
         #element3
       </div>
     </div>
-
-    <div id="demo2">
-      <h2>拖拽</h2>
-      <div class="container">
-        <div class="can-drag"></div>
-      </div>
-    </div>
-    <script src="./main.js"></script>
+    <script src="../../build-dist/index.js"></script>
+    <script>
+        window.onload = function() {
+          var th = window.leenToucher(document.body)
+          console.log(th)
+          th.tap(()=>{
+            console.log('taped')
+          }).tap(()=> {
+            console.log('taped also')
+          }).longTap(()=>{
+            console.log('long taped')
+          }).dbTap(()=> {
+            console.log('double Taped')
+          }).swipe((e)=>{
+            console.log('swiping', e)
+          }).swipeStart(()=>{
+            console.log('start swipe')
+          }).swipeEnd(()=>{
+            console.log('end swipe')
+          })
+        }
+      </script>
   </body>
 </html>

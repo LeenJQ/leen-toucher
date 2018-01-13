@@ -19,7 +19,7 @@ class Toucher {
       events: {},
       touchStartTime: 0,
       lastTouchTime: 0,
-      x1:0,y1:0,x2:0,y2:0,
+      x1:0,y1:0,x2:0,y2:0,moveX:0, moveY:0,
       isLongTap: false, // 用来在 touchend 时判断是否为长按
       longTapTimer: null,
       singleTapTimer: null,
@@ -47,9 +47,9 @@ class Toucher {
    * 初始化事件绑定
    */
   init() {
-    this.target.addEventListener('touchstart', this._proxy('touchStart'))
-    this.target.addEventListener('touchend', this._proxy('touchEnd'))
-    this.target.addEventListener('touchmove', this._proxy('touchMove'))
+    this.target.addEventListener('touchstart', this._proxy('touchStart'),  false)
+    this.target.addEventListener('touchend', this._proxy('touchEnd'),  false)
+    this.target.addEventListener('touchmove', this._proxy('touchMove'),  false)
     // DOM.addEventListener('touchcancel',actionOver);
   }
 
@@ -138,11 +138,13 @@ class Toucher {
 			x1: e.touches[0].pageX,
 			y1: e.touches[0].pageY,
 			x2: 0,
-			y2: 0,
+      y2: 0,
+      moveX: 0,
+      moveY: 0,
       touchStartTime: new Date()
     })
 
-    this._emit('swipeStart', e)
+    this._emit('swipeStart', e.touches[0])
 
     // 把上一次的定时器清除
     this._stopWatchLongTap()
@@ -161,7 +163,21 @@ class Toucher {
    */
   touchMove(e) {
     this.stop()
-    this._emit('swipe', e)
+
+    // 当前坐标
+    const curX = e.touches[0].pageX
+    const curY = e.touches[0].pageY
+    
+    // 更新最后坐标
+    Object.assign(this, {
+      x2: curX,
+      y2: curY,
+      moveX: curX - this.x1,  // 计算移动 x 距离
+      moveY: curY - this.y1,  // 计算移动 y 距离
+      touchStartTime: new Date()
+    })
+    
+    this._emit('swipe', e.touches[0])
   }
 
   /**
@@ -175,7 +191,7 @@ class Toucher {
       return;
     }
 
-    this._emit('swipeEnd', e)    
+    this._emit('swipeEnd', e.touches[0])    
 
     // 到这都没有触发 longTapTimer， 
     // 说明不是长按事件
@@ -187,6 +203,7 @@ class Toucher {
     
     var now = new Date()
     if(!this.events['dbTap'] || this.events['dbTap'].length == 0){
+      // 如果未绑定双击，直接判定为单击      
       this._emit('tap', e)
     } else if(now - this.lastTouchTime > TAP_DELAY_TIME) {
       this.singleTapTimer = setTimeout(()=>{         
@@ -212,13 +229,19 @@ class Toucher {
   }
 }
 
-export default (target, option)=>{ 
+const factory = (target, option)=>{ 
   if(!supportTouch) {
     console.log('当前环境不支持触摸手势')
     return null
   }
- 
+
   const t = new Toucher(target, option)
   t.init()
   return t
 }
+
+if(window && !window.leenToucher ) {
+  window.leenToucher = factory
+}
+
+export default factory

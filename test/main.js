@@ -15,3 +15,12 @@ Toucher(document.getElementById('element2')).tap(()=>{
 }).swipeEnd(()=>{
   console.log('end swipe')
 })
+
+var startX, startY;
+Toucher(document.querySelector('#demo2 .container .can-drag')).swipeStart((_, {target})=>{
+  startX = parseInt(target.style.left) || 0
+  startY = parseInt(target.style.top) || 0
+}).swipe((e, {target, moveX, moveY})=>{
+  target.style.left = startX + moveX + 'px'
+  target.style.top = startY + moveY + 'px'
+})
