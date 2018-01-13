@@ -3,6 +3,7 @@ import {supportTouch} from './env'
 const TAP_DELAY_TIME = 200
 const DB_TAP_DELAY_TIME = 190
 const LONG_TAP_DELAY_TIME = 500
+
 /**
  * Toucher 类
  * @constructor
@@ -24,8 +25,8 @@ class Toucher {
       singleTapTimer: null
     })
 
-    // 初始化内部事件函数
-    const _usedMehod = ['tap', 'fastTap','longTap', 'dbTap']
+    // 注册默认的事件函数
+    const _usedMehod = ['tap', 'longTap', 'dbTap']
     for(let m of _usedMehod) {
       this[m] = (fn, option) => {
         this.register(m, fn, option)
@@ -40,7 +41,7 @@ class Toucher {
   init() {
     this.target.addEventListener('touchstart', this._proxy('touchStart'))
     this.target.addEventListener('touchend', this._proxy('touchEnd'))
-    // DOM.addEventListener('touchmove',touchmove);
+    this.target.addEventListener('touchmove', this._proxy('touchMove'))
     // DOM.addEventListener('touchcancel',actionOver);
   }
 
@@ -128,6 +129,14 @@ class Toucher {
   }
 
   /**
+   * 
+   * @param {Event} e - 事件对象
+   */
+  touchMove(e) {
+
+  }
+
+  /**
    * touch ended
    * 
    * @param {Event} e 
@@ -143,8 +152,10 @@ class Toucher {
     clearTimeout(this.longTapTimer);    
     
     var now = new Date()
-    if(now - this.lastTouchTime > TAP_DELAY_TIME) {
-      this._emit('fastTap', e)
+    console.log(this.events)
+    if(!this.events['dbTap'] || this.events['dbTap'].length == 0){
+      this._emit('tap', e)
+    } else if(now - this.lastTouchTime > TAP_DELAY_TIME) {
       this.singleTapTimer = setTimeout(()=>{         
         this._emit('tap', e)
       }, DB_TAP_DELAY_TIME)

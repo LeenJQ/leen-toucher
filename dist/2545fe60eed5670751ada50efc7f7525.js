@@ -69,14 +69,14 @@ require = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({13:[function(require,module,exports) {
+})({4:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var supportTouch = exports.supportTouch = 'ontouchend' in document ? true : false;
-},{}],4:[function(require,module,exports) {
+},{}],3:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92,6 +92,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var TAP_DELAY_TIME = 200;
 var DB_TAP_DELAY_TIME = 190;
 var LONG_TAP_DELAY_TIME = 500;
+
 /**
  * Toucher 类
  * @constructor
@@ -116,8 +117,8 @@ var Toucher = function () {
       singleTapTimer: null
     });
 
-    // 初始化内部事件函数
-    var _usedMehod = ['tap', 'fastTap', 'longTap', 'dbTap'];
+    // 注册默认的事件函数
+    var _usedMehod = ['tap', 'longTap', 'dbTap'];
 
     var _loop = function _loop(m) {
       _this[m] = function (fn, option) {
@@ -162,7 +163,7 @@ var Toucher = function () {
     value: function init() {
       this.target.addEventListener('touchstart', this._proxy('touchStart'));
       this.target.addEventListener('touchend', this._proxy('touchEnd'));
-      // DOM.addEventListener('touchmove',touchmove);
+      this.target.addEventListener('touchmove', this._proxy('touchMove'));
       // DOM.addEventListener('touchcancel',actionOver);
     }
 
@@ -285,6 +286,15 @@ var Toucher = function () {
     }
 
     /**
+     * 
+     * @param {Event} e - 事件对象
+     */
+
+  }, {
+    key: "touchMove",
+    value: function touchMove(e) {}
+
+    /**
      * touch ended
      * 
      * @param {Event} e 
@@ -305,8 +315,10 @@ var Toucher = function () {
       clearTimeout(this.longTapTimer);
 
       var now = new Date();
-      if (now - this.lastTouchTime > TAP_DELAY_TIME) {
-        this._emit('fastTap', e);
+      console.log(this.events);
+      if (!this.events['dbTap'] || this.events['dbTap'].length == 0) {
+        this._emit('tap', e);
+      } else if (now - this.lastTouchTime > TAP_DELAY_TIME) {
         this.singleTapTimer = setTimeout(function () {
           _this3._emit('tap', e);
         }, DB_TAP_DELAY_TIME);
@@ -346,7 +358,7 @@ exports.default = function (target, option) {
   t.init();
   return t;
 };
-},{"./env":13}],14:[function(require,module,exports) {
+},{"./env":4}],2:[function(require,module,exports) {
 "use strict";
 
 var _index = require("../src/index.js");
@@ -361,12 +373,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   console.log('taped also');
 }).longTap(function () {
   console.log('long taped');
-}).dbTap(function () {
-  console.log('double Taped');
-}).fastTap(function () {
-  console.log('fast taped!');
 });
-},{"../src/index.js":4}],0:[function(require,module,exports) {
+/*.dbTap(()=> {
+  console.log('double Taped')
+})*/
+},{"../src/index.js":3}],0:[function(require,module,exports) {
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
 function Module() {
@@ -384,7 +395,7 @@ function Module() {
 module.bundle.Module = Module;
 
 if (!module.bundle.parent && typeof WebSocket !== 'undefined') {
-  var ws = new WebSocket('ws://' + window.location.hostname + ':52455/');
+  var ws = new WebSocket('ws://' + window.location.hostname + ':64462/');
   ws.onmessage = function(event) {
     var data = JSON.parse(event.data);
 
@@ -485,4 +496,4 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.require, id)
   });
 }
-},{}]},{},[0,14])
+},{}]},{},[0,2])
