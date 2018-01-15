@@ -13,10 +13,11 @@
   * swipe
     > 滑动中，会停止 tap, dbTap, longTap
   * swipeEnd
+  * 添加 swipe 速度阀值属性 (coding...)
 * 长按(longTap)
   > Tap 持续500ms，视为长按
-* 缩放
-* 旋转
+* 缩放 (coding...)
+* 旋转 (coding...)
 
 ## 原理
 
