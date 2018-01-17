@@ -23,7 +23,8 @@ class Toucher {
       isLongTap: false, // 用来在 touchend 时判断是否为长按
       longTapTimer: null,
       singleTapTimer: null,
-      _isActive: true  // 当false 时，停止一切监听
+      _isActive: true,  // 当false 时，停止一切监听
+      state: {} // 数据管理器
     })
 
     // 注册默认的事件函数
@@ -51,6 +52,16 @@ class Toucher {
     this.target.addEventListener('touchend', this._proxy('touchEnd'),  false)
     this.target.addEventListener('touchmove', this._proxy('touchMove'),  false)
     // DOM.addEventListener('touchcancel',actionOver);
+  }
+
+  /**
+   * 执行一次回调函数
+   * 
+   * @param {*} fn 
+   */
+  do(fn) {
+    fn.call(this, this)
+    return this
   }
 
   /**
@@ -82,13 +93,11 @@ class Toucher {
    * @param {DOM} target - 绑定的DOM 对象
    * @param {String} type - 事件类型 (tap, longTap...)
    * @param {Function} fn - 回调注册
-   * @param {Object} Option - 配置对象
    */
   _addEvent(
     target, 
     type, 
-    fn, 
-    option={}) {
+    fn) {
     if(!target || !target.nodeType) {return false}
 
     if(typeof this.events[type] === 'undefined') {
@@ -135,9 +144,9 @@ class Toucher {
     
     // 这里记录最新的触摸信息
     Object.assign(this, {
-			x1: e.touches[0].pageX,
-			y1: e.touches[0].pageY,
-			x2: 0,
+      x1: e.touches[0].pageX,
+      y1: e.touches[0].pageY,
+      x2: 0,
       y2: 0,
       moveX: 0,
       moveY: 0,
@@ -149,7 +158,7 @@ class Toucher {
     // 把上一次的定时器清除
     this._stopWatchLongTap()
     // 延时判断是否为长按事件
-		this.longTapTimer = setTimeout(()=>{
+    this.longTapTimer = setTimeout(()=>{
       // 如果超过 LONG_TAP_DELAY_TIME，判定为长按事件  
       this.isLongTap = true    
       this._emit('longTap',e);
@@ -235,8 +244,11 @@ const factory = (target, option)=>{
     return null
   }
 
-  const t = new Toucher(target, option)
+  let t = new Toucher(target, option)
   t.init()
+
+  Object.preventExtensions(t)
+
   return t
 }
 

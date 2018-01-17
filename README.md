@@ -19,6 +19,29 @@
 * 缩放 (coding...)
 * 旋转 (coding...)
 
+## 安装
+
+## 使用
+
+### 使用 state 来传递数据
+
+Toucher 不允许直接在 Toucher实例上扩展属性，但可以通过state 来存储。
+
+> 这是为了防止覆盖 Toucher 内置函数导致程序混乱
+
+state属性在不想定义全局变量的情况下，函数间传递数据是很有用的
+
+```javascript
+Toucher(element)
+  .swipeStart((e, that) => {
+    that.state.myValue = 1
+    that.xxxx = 2 // error
+  })
+  .swipe((e, that)=>{
+    console.log(that.state.myValue) // 1
+  })
+```
+
 ## 原理
 
 <img src="./img/leen-toucher.png" height="500">
