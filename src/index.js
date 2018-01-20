@@ -19,11 +19,13 @@ class Toucher {
       events: {},
       touchStartTime: 0,
       lastTouchTime: 0,
-      x1:0,y1:0,x2:0,y2:0,moveX:0, moveY:0,
+      x1:0,y1:0,x2:0,y2:0,moveX:0, moveY:0,preX:0,preY:0,
       isLongTap: false, // 用来在 touchend 时判断是否为长按
       longTapTimer: null,
       singleTapTimer: null,
       _isActive: true,  // 当false 时，停止一切监听
+      horizDirect: 'None',
+      vertDirect: 'None',
       state: {} // 数据管理器
     })
 
@@ -176,16 +178,22 @@ class Toucher {
     // 当前坐标
     const curX = e.touches[0].pageX
     const curY = e.touches[0].pageY
-    
+    const preX = this.x2
+    const preY = this.y2
+
     // 更新最后坐标
     Object.assign(this, {
       x2: curX,
       y2: curY,
+      preX,
+      preY,
       moveX: curX - this.x1,  // 计算移动 x 距离
       moveY: curY - this.y1,  // 计算移动 y 距离
-      touchStartTime: new Date()
+      touchStartTime: new Date(),
+      horizDirect: (preX-curX) > 0 ? 'Left':'Right', // 横移动方向
+      vertDirect: (preY-curY) > 0 ? 'Up' : 'Down' // 竖移动方向
     })
-    
+
     this._emit('swipe', e.touches[0])
   }
 
@@ -199,6 +207,13 @@ class Toucher {
     if(this.isLongTap) {
       return;
     }
+
+    // 更新最后坐标
+    Object.assign(this, {
+      touchStartTime: new Date(),
+      horizDirect: 'None',
+      vertDirect: 'None'
+    })
 
     this._emit('swipeEnd', e.touches[0])    
 

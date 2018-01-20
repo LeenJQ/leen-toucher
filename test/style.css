@@ -108,3 +108,30 @@ html, body {
 #demo5 .container .menue li:nth-child(2) {
   top: -50px;
 }
+
+#demo6 .container .garelly {
+  width: 80%;
+  height: 300px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+#demo6 .container .garelly .garelly-wrap {
+  transform: translate(0%, 0px); 
+  flex-direction: row; 
+  transition: transform 0.35s cubic-bezier(0.15, 0.3, 0.25, 1) 0s; 
+  direction: ltr; 
+  display: flex;
+}
+
+#demo6 .container .garelly .photo {
+  width: 100%; 
+  flex-shrink: 0; 
+  overflow: auto;
+}
+
+#demo6 .container .garelly .photo img {
+  width: 100%;
+  height: auto;
+}
